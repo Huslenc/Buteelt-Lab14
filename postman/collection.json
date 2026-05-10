@@ -1,0 +1,405 @@
+{
+  "info": {
+    "_postman_id": "lab14-jsonplaceholder-collection",
+    "name": "Buteelt — JSONPlaceholder",
+    "description": "F.CSM311 Lab14 — JSONPlaceholder API тест collection. Happy path, error case, chain request бүгд багтсан.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Posts",
+      "description": "Posts нөөцтэй холбоотой бүх хүсэлтүүд",
+      "item": [
+        {
+          "name": "Happy GET — List all posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"]
+            },
+            "description": "Бүх posts-ийг жагсаах — 200 ба array буцаахыг шалгана"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 1000ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "pm.test('Body is array', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data).to.be.an('array');",
+                  "  pm.expect(data.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test('First item has required fields', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data[0]).to.have.property('id');",
+                  "  pm.expect(data[0]).to.have.property('title');",
+                  "  pm.expect(data[0]).to.have.property('body');",
+                  "  pm.expect(data[0]).to.have.property('userId');",
+                  "});",
+                  "",
+                  "pm.test('Content-Type is JSON', () => {",
+                  "  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                  "});",
+                  "",
+                  "// Chain: дараагийн request-д ашиглах postId хадгалах",
+                  "const posts = pm.response.json();",
+                  "pm.environment.set('postId', posts[0].id);",
+                  "pm.environment.set('userId', posts[0].userId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET by ID — Single post",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}"]
+            },
+            "description": "Chain: өмнөх request-с авсан postId ашиглан тодорхой post авах"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 1000ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "pm.test('Schema valid — id is number', () => {",
+                  "  const d = pm.response.json();",
+                  "  pm.expect(d.id).to.be.a('number');",
+                  "  pm.expect(d.title).to.be.a('string');",
+                  "  pm.expect(d.body).to.be.a('string');",
+                  "});",
+                  "",
+                  "pm.test('Returned correct post', () => {",
+                  "  const d = pm.response.json();",
+                  "  pm.expect(d.id).to.equal(pm.environment.get('postId'));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST — Create new post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"{{randomTitle}}\",\n  \"body\": \"Pre-request script-ээр үүсгэсэн тест нийтлэл\",\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"]
+            },
+            "description": "Шинэ post үүсгэх — 201 ба шинэ id буцаахыг шалгана"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: random title үүсгэх",
+                  "const timestamp = new Date().toISOString();",
+                  "pm.environment.set('randomTitle', 'Test Post — ' + timestamp);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 1000ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "pm.test('New post has id', () => {",
+                  "  const d = pm.response.json();",
+                  "  pm.expect(d).to.have.property('id');",
+                  "  pm.expect(d.id).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('Title matches sent value', () => {",
+                  "  const d = pm.response.json();",
+                  "  pm.expect(d.title).to.equal(pm.environment.get('randomTitle'));",
+                  "});",
+                  "",
+                  "// Chain: шинэ post-ийн id-г хадгалах",
+                  "const created = pm.response.json();",
+                  "pm.environment.set('newPostId', created.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT — Update post",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"title\": \"Шинэчлэгдсэн гарчиг\",\n  \"body\": \"Шинэчлэгдсэн агуулга\",\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "1"]
+            },
+            "description": "Post-г бүхэлд нь солих — 200 ба өөрчлөлт хадгалагдсаныг шалгана"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 1000ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "pm.test('Updated title matches', () => {",
+                  "  const d = pm.response.json();",
+                  "  pm.expect(d.title).to.equal('Шинэчлэгдсэн гарчиг');",
+                  "});",
+                  "",
+                  "pm.test('id field preserved', () => {",
+                  "  const d = pm.response.json();",
+                  "  pm.expect(d.id).to.equal(1);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE — Delete post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "1"]
+            },
+            "description": "Post устгах — 200 буцаахыг шалгана"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 1000ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "Users нөөцтэй холбоотой хүсэлтүүд",
+      "item": [
+        {
+          "name": "Happy GET — List all users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Бүх хэрэглэгчдийг жагсаах — email format шалгана"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 1000ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "pm.test('Users array not empty', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data).to.be.an('array');",
+                  "  pm.expect(data.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test('Business rule — email format valid', () => {",
+                  "  const data = pm.response.json();",
+                  "  data.forEach(user => {",
+                  "    pm.expect(user.email).to.be.a('string').and.match(/@/);",
+                  "  });",
+                  "});",
+                  "",
+                  "pm.test('Content-Type header is JSON', () => {",
+                  "  pm.response.to.have.header('Content-Type');",
+                  "  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET by ID — Single user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "1"]
+            },
+            "description": "ID=1 хэрэглэгчийг авах — schema болон email шалгана"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Schema has required fields', () => {",
+                  "  const d = pm.response.json();",
+                  "  pm.expect(d).to.have.property('id');",
+                  "  pm.expect(d).to.have.property('name');",
+                  "  pm.expect(d).to.have.property('email');",
+                  "  pm.expect(d).to.have.property('username');",
+                  "});",
+                  "",
+                  "pm.test('id is number type', () => {",
+                  "  const d = pm.response.json();",
+                  "  pm.expect(d.id).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('email matches regex', () => {",
+                  "  const d = pm.response.json();",
+                  "  pm.expect(d.email).to.match(/@/);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Errors",
+      "description": "Negative test — алдааны кейсүүд",
+      "item": [
+        {
+          "name": "Error — 404 Not Found (invalid id)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/999999",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "999999"]
+            },
+            "description": "Байхгүй post-г хүсэх — 404 буцаахыг шалгана (negative test)"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: тест хийх ID-г тохируулах",
+                  "pm.environment.set('invalidId', 999999);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404 Not Found', () => {",
+                  "  pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 1000ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "pm.test('Body is empty object (JSONPlaceholder behaviour)', () => {",
+                  "  const d = pm.response.json();",
+                  "  pm.expect(d).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": []
+}
