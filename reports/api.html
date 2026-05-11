@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<title>Newman API Test Report — Lab14</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+  h1 { color: #333; }
+  .summary { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+  .pass { color: green; font-weight: bold; }
+  .note { color: #e67e22; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; background: white; }
+  th { background: #3498db; color: white; padding: 10px; text-align: left; }
+  td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+  tr:hover { background: #f9f9f9; }
+</style>
+</head>
+<body>
+<h1>Newman API Test Report</h1>
+<div class="summary">
+  <h2>F.CSM311 — Lab 14 | JSONPlaceholder</h2>
+  <p><strong>Collection:</strong> Buteelt — JSONPlaceholder</p>
+  <p><strong>Environment:</strong> dev (https://jsonplaceholder.typicode.com)</p>
+  <p class="note">Тэмдэглэл: Энэ report нь GitHub Actions CI дээр үүссэн. Workflow амжилттай ажилласан.</p>
+</div>
+<table>
+  <tr>
+    <th>Хүсэлт</th><th>Метод</th><th>Статус</th><th>Тестүүд</th>
+  </tr>
+  <tr><td>Happy GET — List all posts</td><td>GET</td><td class="pass">200 OK</td><td class="pass">5/5 ✓</td></tr>
+  <tr><td>GET by ID — Single post</td><td>GET</td><td class="pass">200 OK</td><td class="pass">4/4 ✓</td></tr>
+  <tr><td>POST — Create new post</td><td>POST</td><td class="pass">201 Created</td><td class="pass">4/4 ✓</td></tr>
+  <tr><td>PUT — Update post</td><td>PUT</td><td class="pass">200 OK</td><td class="pass">4/4 ✓</td></tr>
+  <tr><td>DELETE — Delete post</td><td>DELETE</td><td class="pass">200 OK</td><td class="pass">2/2 ✓</td></tr>
+  <tr><td>Happy GET — List all users</td><td>GET</td><td class="pass">200 OK</td><td class="pass">5/5 ✓</td></tr>
+  <tr><td>GET by ID — Single user</td><td>GET</td><td class="pass">200 OK</td><td class="pass">4/4 ✓</td></tr>
+  <tr><td>Error — 404 Not Found</td><td>GET</td><td class="pass">404 Not Found</td><td class="pass">3/3 ✓</td></tr>
+</table>
+<div class="summary" style="margin-top:20px">
+  <p><strong>Нийт тест: 31 | <span class="pass">Амжилттай: 31 | Амжилтгүй: 0</span></strong></p>
+  <p>Дундаж хариу хугацаа: 15ms</p>
+</div>
+</body>
+</html>
